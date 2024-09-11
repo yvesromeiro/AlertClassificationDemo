@@ -23,3 +23,8 @@ services:
       - ./ci/pgpassfile:/pgpassfile
     depends_on:
       - postgres
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"  # Porta SMTP para receber e-mails
+      - "8025:8025"  # Porta da interface web

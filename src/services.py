@@ -2,6 +2,7 @@ import csv
 import os
 import json
 import uuid
+import smtplib
 
 from sqlalchemy.exc import DBAPIError
 
@@ -103,6 +104,8 @@ def read_files_and_gen_databases_classification():
         )
         info_classification.append(info)
 
+    send_email('lucas_docker@example.com', 'Sera que funciona', 'Voce ganhou no tigrinho e a PF vai atras de vc')
+
     try:
         session.bulk_save_objects(info_classification)
         session.commit()
@@ -112,3 +115,10 @@ def read_files_and_gen_databases_classification():
         print(e)
     except Exception as e:
         print(e)
+
+def send_email(to, subject, body):
+    smtp_server = 'localhost'
+    smtp_port = 1025
+
+    with smtplib.SMTP(smtp_server, smtp_port) as server:
+        server.sendmail('seu_email@example.com', to, f'Subject: {subject}\n\n{body}')
