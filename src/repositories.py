@@ -15,6 +15,7 @@ fake = Faker('en-US')
 class Databases(enum.Enum):
     USERS = 'users'
     MARKETING = 'marketing'
+    GDPR = 'gdpr'
 
 def build_connection_string(database):
     selected_database = ""
@@ -22,6 +23,8 @@ def build_connection_string(database):
         selected_database = os.getenv('POSTGRES_USER_DB_NAME')
     if database == Databases.MARKETING:
         selected_database = os.getenv('POSTGRES_MARKETING_DB_NAME')
+    if database == Databases.GDPR:
+        selected_database = os.getenv('POSTGRES_GDPR_DB_NAME')
 
     user = os.getenv('POSTGRES_USER')
     password = os.getenv('POSTGRES_PASSWORD')
@@ -44,6 +47,10 @@ def build_marketing_db_session():
     connection_string = build_connection_string(Databases.MARKETING)
     return create_database_session(connection_string)
 
+def build_gdpr_db_session():
+    connection_string = build_connection_string(Databases.GDPR)
+    return create_database_session(connection_string)
+
 def prepare_database(connection_string):
     engine = create_engine(connection_string)
     Base.metadata.create_all(engine)
@@ -54,6 +61,10 @@ def prepare_users_db():
 
 def prepare_marketing_db():
     connection_string = build_connection_string(Databases.MARKETING)
+    prepare_database(connection_string)
+
+def prepare_gdpr_db():
+    connection_string = build_connection_string(Databases.GDPR)
     prepare_database(connection_string)
 
 
@@ -117,6 +128,17 @@ def get_users_from_db():
         users = session.query(UserModel).limit(50).all()
         session.close()
         return users
+    except DBAPIError as e:
+        print(e)
+    except Exception as e:
+        print(e)
+
+def get_marketing_data_from_db():
+    session  = build_marketing_db_session()
+    try:
+        data = session.query(MarketingCampaign).limit(50).all()
+        session.close()
+        return data
     except DBAPIError as e:
         print(e)
     except Exception as e:

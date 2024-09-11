@@ -1,12 +1,12 @@
 [
   {
-    "db_name": "UsersDB",
+    "db_name": "usersdb",
     "owner_email": "john.doe@company.com",
     "manager_email": "lucas.sec@company.com",
     "classification": "high"
   },
   {
-    "db_name": "MarketingDB",
+    "db_name": "marketingdb",
     "owner_email": "jane.smith@company.com",
     "manager_email": "anna@company.com",
     "classification": "medium"

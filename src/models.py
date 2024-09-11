@@ -21,6 +21,15 @@ class UserInformation:
 
 Base = declarative_base()
 
+class ClassificationModel(Base):
+    __tablename__ = 'data_classification'
+
+    id = Column(PGUUID, primary_key=True, default=uuid.uuid4)
+    db_name = Column(String)
+    owner_email = Column(String)
+    manager_email = Column(String)
+    classification = Column(String)
+
 class UserModel(Base):
     __tablename__ = 'users'
 
