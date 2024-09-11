@@ -14,6 +14,7 @@ def main():
     populate_marketing_db()
     gen_users_csv()
     read_files_and_gen_databases_classification()
+    print('Processed successfully!')
 
 if __name__ == "__main__":
     main()

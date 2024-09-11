@@ -56,19 +56,23 @@ def prepare_database(connection_string):
     Base.metadata.create_all(engine)
 
 def prepare_users_db():
+    print('Preparing users database')
     connection_string = build_connection_string(Databases.USERS)
     prepare_database(connection_string)
 
 def prepare_marketing_db():
+    print('Preparing marketing database')
     connection_string = build_connection_string(Databases.MARKETING)
     prepare_database(connection_string)
 
 def prepare_gdpr_db():
+    print('Preparing gdpr database')
     connection_string = build_connection_string(Databases.GDPR)
     prepare_database(connection_string)
 
 
 def populate_users_db():
+    print('Starting to populate users database')
     session = build_users_db_session()
     gen_number = os.getenv('NUMBER_OF_RECORDS_IN_USERS_TABLE')
     users = []
@@ -97,6 +101,7 @@ def populate_users_db():
         print(e)
 
 def populate_marketing_db():
+    print('Starting to populate marketing database')
     session = build_marketing_db_session()
     gen_number = os.getenv('NUMBER_OF_RECORDS_IN_MARKETING_TABLE')
     marketing_data = []

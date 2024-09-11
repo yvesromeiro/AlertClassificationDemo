@@ -8,7 +8,8 @@ from sqlalchemy.exc import DBAPIError
 
 from src.models import BaseClassification, UserInformation, ClassificationModel
 from src.repositories import get_users_from_db, get_marketing_data_from_db, build_gdpr_db_session
-
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 def read_bases_classification():
     file_path = os.path.join("../data/input/", 'bases_classification.json')
@@ -36,6 +37,7 @@ def read_csv_user_information():
         return user_information_list
 
 def gen_users_csv():
+    print('Generating users information csv file...')
     classified_bases = read_bases_classification()
     users = get_users_from_db()
     marketing = get_marketing_data_from_db()
@@ -88,23 +90,30 @@ def gen_classification_csv_database(classification_data):
             writer.writerow(row_data)
 
 def read_files_and_gen_databases_classification():
+    print('Reading and generating databases classification based on Json classification and CSV user information')
     classified_bases = read_bases_classification()
     csv_data = read_csv_user_information()
     session = build_gdpr_db_session()
 
     info_classification = []
 
-    for data in csv_data:
+    for data in classified_bases:
         info = ClassificationModel(
             id = uuid.uuid4(),
-            db_name = list(filter(lambda x: x.manager_email == data.user_manager, classified_bases))[0].db_name,
-            owner_email = list(filter(lambda x: x.manager_email == data.user_manager, classified_bases))[0].owner_email,
-            manager_email = list(filter(lambda x: x.manager_email == data.user_manager, classified_bases))[0].manager_email,
-            classification = list(filter(lambda x: x.manager_email == data.user_manager, classified_bases))[0].classification
+            db_name = data.db_name,
+            owner_email = data.owner_email,
+            manager_email = data.manager_email,
+            classification = data.classification
         )
         info_classification.append(info)
 
-    send_email('lucas_docker@example.com', 'Sera que funciona', 'Voce ganhou no tigrinho e a PF vai atras de vc')
+    for user_data in csv_data:
+        if user_data.user_manager == list(filter(lambda x: x.classification == 'high',  classified_bases))[0].manager_email:
+            print(f'Start sending email to high risk record {user_data.user_id}')
+            message = f'<h2>A new High risk information has been added to the database usersdb.</h2>'
+            message += f'\n<p>The user ID is: {user_data.user_id}</p>'
+            message += f'\n<p>please verify the information and take the necessary actions.</p>'
+            send_email('no-reply@company.com', 'High risk on new record inserted on usersdb', message)
 
     try:
         session.bulk_save_objects(info_classification)
@@ -116,9 +125,17 @@ def read_files_and_gen_databases_classification():
     except Exception as e:
         print(e)
 
-def send_email(to, subject, body):
+def send_email(to, subject, html_message):
     smtp_server = 'localhost'
     smtp_port = 1025
 
+    msg = MIMEMultipart('alternative')
+    msg['From'] = 'no-reply@company.com'
+    msg['To'] = to
+    msg['Subject'] = subject
+
+    html_part = MIMEText(html_message, 'html')
+    msg.attach(html_part)
+
     with smtplib.SMTP(smtp_server, smtp_port) as server:
-        server.sendmail('seu_email@example.com', to, f'Subject: {subject}\n\n{body}')
+        server.sendmail(msg['From'], msg['To'], msg.as_string())
